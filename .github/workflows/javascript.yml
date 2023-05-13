@@ -1,0 +1,37 @@
+name: Javascript Tests
+
+on:
+  push:
+    branches: [ "main" ]
+    paths: [ "javascript/**" ]
+  pull_request:
+    branches: [ "main" ]
+    paths: [ "javascript/**" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: javascript
+
+    strategy:
+      matrix:
+        node-version:
+          #- 14.x
+          - 16.x
+          - 18.x
+
+    steps:
+    - uses: actions/checkout@v3
+    - run: pwd
+    - run: ls
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: javascript/package-lock.json
+    - run: npm i
+    - run: npm run build
+    - run: npm run test

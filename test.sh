@@ -3,7 +3,7 @@
 set -e
 
 cd javascript
-turbo test
+npm run test
 
 cd ../python
 poetry run pytest

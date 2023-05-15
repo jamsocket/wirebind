@@ -2,13 +2,13 @@ import argparse
 import asyncio
 import importlib
 import importlib.util
+from os.path import splitext
 
 from websockets.server import WebSocketServerProtocol as WebSocket
 from websockets.server import serve
 
 from .multiplex import Multiplexer
 
-from os.path import splitext
 
 class Server:
     def __init__(self, root):
@@ -17,14 +17,14 @@ class Server:
     async def serve_ws(self, websocket: WebSocket):
         def send(message):
             asyncio.create_task(websocket.send(message))
-        
+
         multiplexer = Multiplexer(send)
         multiplexer.set_root(self.root)
 
         async for message in websocket:
             multiplexer.receive(message)
-        
-        print('Connection closed.')
+
+        print("Connection closed.")
         multiplexer.cleanup()
 
     async def serve(self):
@@ -47,8 +47,8 @@ def main():
     spec.loader.exec_module(module)
     root = module.root
     server = Server(root)
-    
-    print('Listening.')
+
+    print("Listening.")
     server.run()
 
 

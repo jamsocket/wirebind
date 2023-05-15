@@ -36,7 +36,7 @@ export class ReadyGuard {
     }
 }
 
-export class wirebindSocket {
+export class WirebindSocket {
     private socket: WebSocket | null = null;
     private multiplexer: Multiplexer;
     private readyGuard = new ReadyGuard();

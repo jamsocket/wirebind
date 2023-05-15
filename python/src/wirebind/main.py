@@ -1,7 +1,14 @@
+import argparse
 import asyncio
+import importlib
+import importlib.util
 
-from websockets.server import serve, WebSocketServerProtocol as WebSocket
+from websockets.server import WebSocketServerProtocol as WebSocket
+from websockets.server import serve
+
 from .multiplex import Multiplexer
+
+from os.path import splitext
 
 class Server:
     def __init__(self, root):
@@ -29,13 +36,16 @@ class Server:
 
 
 def main():
-    #parser = argparse.ArgumentParser()
-    #parser.add_argument("module", nargs='?', default="wirebind.demo")
-    #args = parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("file", help="Filename of Python module to load.")
+    args = parser.parse_args()
 
-    #module = importlib.import_module(args.module)
-    #root = ModuleRPCServer(module)
-    from .demo import root
+    name, _ = splitext(args.file)
+    spec = importlib.util.spec_from_file_location(name, args.file)
+    module = importlib.util.module_from_spec(spec)
+
+    spec.loader.exec_module(module)
+    root = module.root
     server = Server(root)
     
     print('Listening.')

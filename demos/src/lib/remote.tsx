@@ -1,15 +1,15 @@
 "use client";
 
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { AtomReplica, RemoteObjectRequest, RpcMessage, wirebindSocket } from "wirebind";
+import { AtomReplica, RemoteObjectRequest, WirebindSocket } from "wirebind";
 import { Sender } from "wirebind/dist/sender";
 
-const RemoteContext = createContext<wirebindSocket | null>(null)
+const RemoteContext = createContext<WirebindSocket | null>(null)
 
 export const useRemote = () => useContext(RemoteContext);
 
 export const RemoteProvider = ({ children, endpoint }: { children: React.ReactNode, endpoint: string }) => {
-    const remote = useRef<wirebindSocket>(new wirebindSocket())
+    const remote = useRef<WirebindSocket>(new WirebindSocket())
 
     useEffect(() => {
         remote.current.connect(endpoint)
@@ -21,55 +21,6 @@ export const RemoteProvider = ({ children, endpoint }: { children: React.ReactNo
         </RemoteContext.Provider>
     )
 }
-
-// class RemoteObject {
-//     sender?: Sender<RpcMessage>
-//     state: Record<string, any>
-
-//     /** State listeners. */
-//     listeners: Record<string, ((value: any) => void)[]>
-//     socket: wirebindSocket
-
-//     constructor(socket: wirebindSocket) {
-//         this.state = {}
-//         this.listeners = {}
-//         this.socket = socket
-//     }
-
-//     setSender(sender: Sender<RpcMessage>) {
-//         this.sender = sender
-//     }
-
-//     addListener(name: string, listener: (value: any) => void) {
-//         if (!this.listeners[name]) {
-//             this.listeners[name] = []
-//         }
-//         this.listeners[name].push(listener)
-//     }
-
-//     removeListener(name: string, listener: (value: any) => void) {
-//         if (!this.listeners[name]) {
-//             return
-//         }
-//         this.listeners[name] = this.listeners[name].filter(l => l !== listener)
-//     }
-
-//     /** Call a function on the remote object. */
-//     async call(name: string, args?: Record<string, any>): Promise<any> {
-//         if (!this.sender) {
-//             throw new Error("Something called before remote object is connected.")
-//         }
-
-//         let p = new WrappedPromise()
-//         let replySender = new Sender(p.resolve)
-
-//         await this.sender.send({
-//             call: name,
-//             args,
-//             reply: replySender,
-//         })
-//     }
-// }
 
 class WrappedPromise {
     promise: Promise<any>

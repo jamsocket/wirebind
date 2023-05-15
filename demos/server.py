@@ -1,9 +1,9 @@
 import asyncio
 from typing import Optional
 
-from .rpc import expose
-from .binds.atom import Atom
-from .sender import Sender
+from wirebind.rpc import expose
+from wirebind.binds.atom import Atom
+from wirebind.sender import Sender
 
 
 class Slider:

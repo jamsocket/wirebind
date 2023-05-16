@@ -20,6 +20,7 @@ function StableDiffusionUI() {
   const sdApp = useRemoteObject("stable-diffusion")
   const imageData = useRemoteValue(sdApp?.result)
   const [prompts, setPrompts] = useRemoteMutable(sdApp?.prompts)
+  const progress = useRemoteValue(sdApp?.progress)
 
   let url = null
   if (imageData) {
@@ -29,14 +30,28 @@ function StableDiffusionUI() {
 
   return (
     <div className="flex flex-col space-y-3">
+      <button onClick={() => sdApp?.shuffle_latents.send()} >shuffle latents</button>
+
+      <div>
+        <div style={{width: `${progress * 100}%`}} className="h-2 bg-indigo-600"></div>
+      </div>
+
       {url ? <img src={url} /> : null}
 
       {
-        prompts?.map((p: WeightedPrompt, i: number) => <WeightedPromptEntry key={i} value={p} onChange={(v) => {
+        prompts?.map((p: WeightedPrompt, i: number) => <div><WeightedPromptEntry key={i} value={p} onChange={(v) => {
           const newPrompts = [...prompts]
           newPrompts[i] = v
           setPrompts(newPrompts)
-        }} />)
+        }} />
+        <button onClick={
+          () => {
+            const newPrompts = [...prompts]
+            newPrompts.splice(i, 1)
+            setPrompts(newPrompts)
+          }
+        }>-</button>
+        </div>)
       }
 
       <button

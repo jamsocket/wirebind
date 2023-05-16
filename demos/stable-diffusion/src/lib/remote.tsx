@@ -85,7 +85,6 @@ export const useRemoteMutable = (atom?: AtomReplica): any => {
         const onValueChage = (value: any) => {
             // if callbackRef has a value, don't set the state.
             if (!callbackRef.current) {
-                console.log('oo1')
                 setValue(value)
             }
         }
@@ -100,7 +99,6 @@ export const useRemoteMutable = (atom?: AtomReplica): any => {
             clearInterval(callbackRef.current)
         }
         callbackRef.current = setInterval(() => {
-            console.log('oo2')
             setValue(atom?.value)
             callbackRef.current = null
         }, 5000) // this is kind of a hack

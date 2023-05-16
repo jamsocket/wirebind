@@ -103,7 +103,6 @@ class StableDiffusion:
                 latents = self.latents.clone()
 
                 for i, t in enumerate(timesteps):
-                    
                     if self.prompts_dirty.is_set():
                         break
 
@@ -126,7 +125,7 @@ class StableDiffusion:
 
                     if i % 2 == 0:
                         self.update_image(latents)
-                    self.progress.set(i / len(timesteps) - 1)
+                    self.progress.set(i / (len(timesteps) - 1))
 
                 self.update_image(latents)
 

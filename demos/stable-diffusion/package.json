@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/webmidi": "^2.0.7",
     "autoprefixer": "^10.4.14",
     "next": "^13.4.1",
     "react": "^18.2.0",

@@ -38,7 +38,7 @@ class StableDiffusion:
 
     def prepare_prompt_embeds(self):
         self.prompt_embeds = self.pipe._encode_prompt(
-            "three cats", #self.prompt.get(),
+            self.prompt.get(),
             self.pipe._execution_device,
             1,
             True,
@@ -108,6 +108,7 @@ class StableDiffusion:
 
             if i % 10 == 0:
                self.update_image()
+        self.update_image()
 
 
 STABLE_DIFFUSION = StableDiffusion()

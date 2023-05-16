@@ -1,10 +1,11 @@
 "use client"
 
-import { RemoteProvider, useRemoteObject, useRemoteValue } from "@/lib/remote"
+import { RemoteProvider, useRemoteMutable, useRemoteObject, useRemoteValue } from "@/lib/remote"
 
 function Counter() {
   const sdApp = useRemoteObject("stable-diffusion")
   const imageData = useRemoteValue(sdApp?.result)
+  const [prompt, setPrompt] = useRemoteMutable(sdApp?.prompt)
   
   let url = null
   if (imageData) {
@@ -15,6 +16,8 @@ function Counter() {
   return (
     <div className="flex flex-col space-y-3">
       { url ? <img src={url} /> : null }
+
+      <input type="text" value={prompt} onChange={(t) => setPrompt(t.target.value)} />
     </div>
   )
 }

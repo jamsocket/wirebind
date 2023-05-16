@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { AtomReplica, RemoteObjectRequest, WirebindSocket } from "wirebind";
 import { Sender } from "wirebind/dist/sender";
 
@@ -75,5 +75,19 @@ export const useRemoteValue = (atom?: AtomReplica): any => {
     }, [atom])
 
     return value
+}
+
+export const useRemoteMutable = (atom?: AtomReplica): any => {
+    const [value, setValue] = useState(atom?.value)
+
+    useEffect(() => {
+        atom?.addListener(setValue)
+    }, [atom])
+
+    const setter = useCallback((value: any) => {
+        atom?.set(value)
+    }, [atom])
+
+    return [value, setter]
 }
 

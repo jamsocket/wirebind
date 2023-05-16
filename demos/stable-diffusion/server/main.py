@@ -1,14 +1,10 @@
-from diffusers import StableDiffusionPipeline, EulerDiscreteScheduler
+from diffusers import StableDiffusionPipeline
 import torch
-from diffusers.loaders import TextualInversionLoaderMixin
-from diffusers.utils import randn_tensor
 from typing import Optional
 from threading import Thread
 import io
 
-from wirebind.rpc import expose
 from wirebind.binds.atom import Atom
-from wirebind.sender import Sender
 
 
 MODEL_ID = "stabilityai/stable-diffusion-2"
@@ -20,7 +16,7 @@ class StableDiffusion:
     pipe: StableDiffusionPipeline
     latents: torch.Tensor
     prompt_embeds: torch.Tensor
-    num_timesteps: int = 50
+    num_timesteps: int = 500
     current_timestep: int = 0
 
     def prepare_latents(self):
@@ -73,42 +69,42 @@ class StableDiffusion:
         self.result.set(bytes.getvalue())
 
 
-    @torch.no_grad()
     def run_diffusion(self):
-        self.pipe.scheduler.set_timesteps(50)
-        timesteps = self.pipe.scheduler.timesteps
-        prompt_embeds = self.prompt_embeds
+        with torch.no_grad():
+            self.pipe.scheduler.set_timesteps(self.num_timesteps)
+            timesteps = self.pipe.scheduler.timesteps
+            prompt_embeds = self.prompt_embeds
 
-        guidance_scale = 7.5
-        do_classifier_free_guidance = True
+            guidance_scale = 7.5
+            do_classifier_free_guidance = True
 
-        extra_step_kwargs = self.pipe.prepare_extra_step_kwargs(None, 0.0)
+            extra_step_kwargs = self.pipe.prepare_extra_step_kwargs(None, 0.0)
 
-        for i, t in enumerate(timesteps):
-            print(i)
-            # expand the latents if we are doing classifier free guidance
-            latent_model_input = torch.cat([self.latents] * 2) if do_classifier_free_guidance else self.latents
-            latent_model_input = self.pipe.scheduler.scale_model_input(latent_model_input, t)
+            for i, t in enumerate(timesteps):
+                print(i)
+                # expand the latents if we are doing classifier free guidance
+                latent_model_input = torch.cat([self.latents] * 2) if do_classifier_free_guidance else self.latents
+                latent_model_input = self.pipe.scheduler.scale_model_input(latent_model_input, t)
 
-            # predict the noise residual
-            noise_pred = self.pipe.unet(
-                latent_model_input,
-                t,
-                encoder_hidden_states=prompt_embeds,
-                return_dict=False,
-            )[0]
+                # predict the noise residual
+                noise_pred = self.pipe.unet(
+                    latent_model_input,
+                    t,
+                    encoder_hidden_states=prompt_embeds,
+                    return_dict=False,
+                )[0]
 
-            # perform guidance
-            if do_classifier_free_guidance:
-                noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
-                noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
+                # perform guidance
+                if do_classifier_free_guidance:
+                    noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
+                    noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
 
-            # # compute the previous noisy sample x_t -> x_t-1
-            self.latents = self.pipe.scheduler.step(noise_pred, t, self.latents, **extra_step_kwargs, return_dict=False)[0]
+                # # compute the previous noisy sample x_t -> x_t-1
+                self.latents = self.pipe.scheduler.step(noise_pred, t, self.latents, **extra_step_kwargs, return_dict=False)[0]
 
-            if i % 10 == 0:
-               self.update_image()
-        self.update_image()
+                if i % 10 == 0:
+                    self.update_image()
+                self.update_image()
 
 
 STABLE_DIFFUSION = StableDiffusion()

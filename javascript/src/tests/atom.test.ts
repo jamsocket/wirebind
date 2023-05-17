@@ -41,6 +41,6 @@ describe('Atom', () => {
         const replica: AtomReplica = q.get()
         atom.set(5)
 
-        expect(replica.value).toBe(5)
+        expect(replica.get()).toBe(5)
     });
 });

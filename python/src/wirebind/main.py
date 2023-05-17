@@ -15,8 +15,10 @@ class Server:
         self.root = root
 
     async def serve_ws(self, websocket: WebSocket):
+        loop = asyncio.get_event_loop()
         def send(message):
-            asyncio.create_task(websocket.send(message))
+            #asyncio.create_task(websocket.send(message))
+            asyncio.run_coroutine_threadsafe(websocket.send(message), loop)
 
         multiplexer = Multiplexer(send)
         multiplexer.set_root(self.root)

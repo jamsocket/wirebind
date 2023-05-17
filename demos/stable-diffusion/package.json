@@ -9,12 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/webmidi": "^2.0.7",
     "autoprefixer": "^10.4.14",
     "next": "^13.4.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tailwindcss": "^3.3.2",
-    "wirebind": "../javascript"
+    "wirebind": "../../javascript"
   },
   "devDependencies": {
     "@types/node": "20.1.4",

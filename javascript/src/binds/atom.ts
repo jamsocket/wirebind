@@ -47,9 +47,15 @@ export class Atom extends Packable {
 }
 
 export class AtomReplica {
-    value: any = null
+    serverValue: any = null
+    localValue: any = null
+
+    /** Invariant: if dirty is false, localValue and serverValue must point to the same value. */
+    dirty: boolean = false
+
     setter: Sender<any>
     listeners: Array<(v: any) => void> = []
+    updateLocalValueTimeout: ReturnType<typeof setTimeout> | null = null
 
     constructor(packed: Record<string, any>) {
         packed['get'].send(new Sender(this.update))
@@ -57,14 +63,43 @@ export class AtomReplica {
     }
 
     update = (value: any) => {
-        this.value = value
+        this.serverValue = value
+        this.dirty = true
+
+        if (this.updateLocalValueTimeout === null) {
+            this.updateLocalValue()
+        }
+    }
+
+    updateLocalValue = () => {
+        this.localValue = this.serverValue
+        this.updateLocalValueTimeout = null
+        
+        if (this.dirty) {
+            this.notifyListeners()
+            this.dirty = false
+        }
+    }
+
+    notifyListeners = () => {
         for (const listener of this.listeners) {
-            listener(value)
+            listener(this.localValue)
         }
     }
 
     set = (value: any) => {
+        this.localValue = value
+        this.dirty = true
         this.setter.send(value)
+        this.notifyListeners()
+        if (this.updateLocalValueTimeout !== null) {
+            clearTimeout(this.updateLocalValueTimeout)
+        }
+        this.updateLocalValueTimeout = setTimeout(this.updateLocalValue, 5_000)
+    }
+
+    get = () => {
+        return this.localValue
     }
 
     addListener(listener: (value: any) => void) {

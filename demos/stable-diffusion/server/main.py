@@ -59,13 +59,19 @@ class StableDiffusion:
 
     def prepare_prompt_embeds(self):
         template = self.prompt_template.get()
+
+        weight_sum = sum(p["weight"] for p in self.prompts.get())
+        if weight_sum == 0:
+            self.prompt_embeds = self.pipe._encode_prompt("", self.pipe._execution_device, 1, True)
+            return
+
         embedded_prompts = [
             (p["weight"], self.pipe._encode_prompt(template.format(p["prompt"]), self.pipe._execution_device, 1, True))
             for p in self.prompts.get()
             if p["prompt"] != "" and p["weight"] != 0
         ]
 
-        desired_norm = sum(p.norm() * w for (w, p) in embedded_prompts) / sum(w for (w, _) in embedded_prompts)
+        desired_norm = sum(p.norm() * w for (w, p) in embedded_prompts) / weight_sum
         pp = sum(w * pe for (w, pe) in embedded_prompts)
         pp = pp * desired_norm / pp.norm()
         self.prompt_embeds = pp

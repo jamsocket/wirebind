@@ -13,8 +13,8 @@ MODEL_ID = "stabilityai/stable-diffusion-2"
 
 class StableDiffusion:
     prompts = Atom([
-        {"prompt": "a hamburger", "weight": 1.0},
-        {"prompt": "an ice cream sandwich", "weight": 1.0},
+        {"prompt": "a pair of cats", "weight": 0.5},
+        {"prompt": "a pair of dogs", "weight": 0.5},
     ])
     progress = Atom(0)
     prompts_dirty: Event
@@ -88,6 +88,7 @@ class StableDiffusion:
     def run_diffusion(self):
         with torch.no_grad():
             while True:
+                self.progress.set(0)
                 self.prompts_dirty.clear()
                 self.prepare_prompt_embeds()
 

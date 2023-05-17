@@ -85,7 +85,7 @@ function StableDiffusionUI() {
       <Button onClick={() => sdApp?.shuffle_latents.send()} text="Shuffle latents" />
 
       <div>
-        <div style={{ width: `${progress * 100}%` }} className="h-2 bg-indigo-600"></div>
+        <div style={{ width: `${progress * 100}%`, transition: "width 200ms, opacity 500ms", opacity: (progress === 1 ? 0 : 1) }} className="h-1 bg-indigo-600 rounded-full"></div>
       </div>
 
       <div className="w-[768px] h-[768px] bg-black">

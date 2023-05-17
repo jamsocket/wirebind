@@ -77,6 +77,34 @@ export const useRemoteValue = (atom?: AtomReplica): any => {
     return value
 }
 
+function debounce(callback: (...args: any) => void, delay: number) {
+    let lastCalled = 0;
+    let lastValue: any = null;
+    let timeout: any = null;
+
+    return (...args: any) => {
+        lastValue = args;
+
+        if (timeout) {
+            return
+        }
+
+        const now = Date.now();
+        const timeSinceLastCall = now - lastCalled;
+        
+        if (timeSinceLastCall > delay) {
+            callback(...lastValue);
+            lastCalled = now;
+        } else {
+            timeout = setTimeout(() => {
+                callback(...lastValue);
+                lastCalled = Date.now();
+                timeout = null;
+            }, delay - timeSinceLastCall);
+        }
+    }
+}
+
 export const useRemoteMutable = (atom?: AtomReplica): any => {
     const [value, setValue] = useState(atom?.value)
     const callbackRef = useRef<any>()
@@ -103,7 +131,7 @@ export const useRemoteMutable = (atom?: AtomReplica): any => {
             callbackRef.current = null
         }, 5000) // this is kind of a hack
 
-        atom?.set(value)
+        debounce((v) => atom?.set(v), 200)(value)
     }, [atom])
 
     return [value, setter]

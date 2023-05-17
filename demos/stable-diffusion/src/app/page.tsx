@@ -22,16 +22,19 @@ function WeightedPromptEntry(props: { value: WeightedPrompt, onChange: (v: Weigh
       <input type="text" value={value.prompt} onChange={(t) => onChange({ ...value, prompt: t.target.value })}
         className="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
       />
-      <input type="range" min={0} max={1} step={0.1} value={value.weight} onChange={(t) => onChange({ ...value, weight: Number(t.target.value) })} />
+      <input type="range" min={0} max={1} step={0.001} value={value.weight} onChange={(t) => onChange({ ...value, weight: Number(t.target.value) })} />
     </>
   )
 }
 
 function useWebMidi(callback: (slider: number, value: number) => void) {
   useEffect(() => {
+    const toCleanUp: Array<WebMidi.MIDIInput> = []
+
     const onMIDISuccess = (midiAccess: WebMidi.MIDIAccess) => {
       for (const input of midiAccess.inputs.values()) {
         input.onmidimessage = onMessage;
+        toCleanUp.push(input)
       }
     }
 
@@ -42,6 +45,12 @@ function useWebMidi(callback: (slider: number, value: number) => void) {
 
     if (navigator.requestMIDIAccess) {
       navigator.requestMIDIAccess().then(onMIDISuccess, undefined);
+    }
+
+    return () => {
+      for (const input of toCleanUp) {
+        input.onmidimessage = null as any
+      }
     }
   }, [callback])
 }
@@ -64,7 +73,8 @@ function StableDiffusionUI() {
     }
 
     const newPrompts = [...prompts]
-    newPrompts[slider].weight = value / 127.0
+    newPrompts[slider] = { ...newPrompts[slider], weight: value / 127 }
+    console.log("new", newPrompts, slider, value)
     setPrompts(newPrompts)
   }, [prompts])
 
@@ -78,7 +88,9 @@ function StableDiffusionUI() {
         <div style={{ width: `${progress * 100}%` }} className="h-2 bg-indigo-600"></div>
       </div>
 
-      {url ? <img src={url} /> : null}
+      <div className="w-[768px] h-[768px] bg-black">
+        {url ? <img src={url} /> : null}
+      </div>
 
       {
         prompts?.map((p: WeightedPrompt, i: number) => <div key={i} className="flex flex-row space-x-3"><WeightedPromptEntry value={p} onChange={(v) => {

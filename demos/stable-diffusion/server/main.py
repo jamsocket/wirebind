@@ -3,7 +3,6 @@ import torch
 from typing import Optional
 from threading import Thread, Event
 import io
-import numpy as np
 
 from wirebind.binds.atom import Atom
 from wirebind.sender import Sender

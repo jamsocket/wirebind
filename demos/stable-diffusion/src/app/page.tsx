@@ -44,7 +44,11 @@ function useWebMidi(callback: (slider: number, value: number) => void) {
     }
 
     if (navigator.requestMIDIAccess) {
-      navigator.requestMIDIAccess().then(onMIDISuccess, undefined);
+      navigator.requestMIDIAccess().then(onMIDISuccess, (e) => {
+        console.log("No MIDI", e);
+      });
+    } else {
+      console.log("No MIDI support in your browser.");
     }
 
     return () => {

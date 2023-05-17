@@ -68,15 +68,15 @@ function StableDiffusionUI() {
   }
 
   const midiCallback = useCallback((slider: number, value: number) => {
-    if (!prompts || prompts.length <= slider) {
+    if (!sdApp) {
       return
     }
 
+    const prompts = sdApp.prompts.get()
     const newPrompts = [...prompts]
     newPrompts[slider] = { ...newPrompts[slider], weight: value / 127 }
-    console.log("new", newPrompts, slider, value)
     setPrompts(newPrompts)
-  }, [prompts])
+  }, [sdApp])
 
   useWebMidi(midiCallback)
 

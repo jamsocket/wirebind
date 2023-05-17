@@ -107,31 +107,17 @@ function debounce(callback: (...args: any) => void, delay: number) {
 
 export const useRemoteMutable = (atom?: AtomReplica): any => {
     const [value, setValue] = useState(atom?.value)
-    const callbackRef = useRef<any>()
 
     useEffect(() => {
         const onValueChage = (value: any) => {
-            // if callbackRef has a value, don't set the state.
-            if (!callbackRef.current) {
-                setValue(value)
-            }
+            setValue(value)
         }
 
         atom?.addListener(onValueChage)
     }, [atom])
 
     const setter = useCallback((value: any) => {
-        setValue(value)
-
-        if (callbackRef.current) {
-            clearInterval(callbackRef.current)
-        }
-        callbackRef.current = setInterval(() => {
-            setValue(atom?.value)
-            callbackRef.current = null
-        }, 5000) // this is kind of a hack
-
-        debounce((v) => atom?.set(v), 200)(value)
+        atom?.set(value)
     }, [atom])
 
     return [value, setter]

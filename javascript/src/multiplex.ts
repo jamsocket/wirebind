@@ -41,7 +41,6 @@ export class Multiplexer {
     /** Send a message to a channel on the remote multiplexer. */
     send(message: any, ch: number): void {
         const msg: Message<any> = {message, ch};
-        console.log("Sending", msg)
         const messageEnc = this.encoder.encode(msg);
         this.sendFunction(messageEnc);
     }

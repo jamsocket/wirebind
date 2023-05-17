@@ -81,6 +81,10 @@ function StableDiffusionUI() {
     }
 
     const prompts = sdApp.prompts.get()
+    if (prompts?.length <= slider) {
+      return
+    }
+
     const newPrompts = [...prompts]
     newPrompts[slider] = { ...newPrompts[slider], weight: value / 127 }
     setPrompts(newPrompts)
@@ -99,7 +103,7 @@ function StableDiffusionUI() {
         </label>
         <label>
           <input type="checkbox" checked={showProgress ?? false} onChange={(t) => setShowProgress(t.target.checked)} />
-          &nbsp;Show progress render
+          &nbsp;Show preview (slower)
         </label>
         <label>
           <input type="checkbox" checked={restartOnChange ?? false} onChange={(t) => setRestartOnChange(t.target.checked)} />

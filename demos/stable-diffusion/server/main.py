@@ -40,19 +40,14 @@ class StableDiffusion:
 
         self.prepare_latents()
 
-        sender = Sender(self.soft_restart)
+        sender = Sender(lambda _: self.prompts_dirty.set())
 
         self.prompts.add_listener(sender)
         self.prompt_template.add_listener(sender)
-        self.num_timesteps.add_listener(Sender(lambda _: self.prompts_dirty.set()))
+        self.num_timesteps.add_listener(sender)
 
         self.thread = Thread(target=self.run_diffusion)
         self.thread.start()
-
-
-    def soft_restart(self, _):
-        if self.restart_on_change.get():
-            self.prompts_dirty.set()
 
 
     def prepare_latents(self, _=None):
@@ -80,7 +75,7 @@ class StableDiffusion:
         embedded_prompts = [
             (p["weight"], self.pipe._encode_prompt(template.format(p["prompt"]), self.pipe._execution_device, 1, True))
             for p in self.prompts.get()
-            if p["prompt"] != "" and p["weight"] != 0
+            if p.get("prompt", "") != "" and p["weight"] != 0
         ]
 
         desired_norm = sum(p.norm() * w for (w, p) in embedded_prompts) / weight_sum
@@ -124,8 +119,12 @@ class StableDiffusion:
                 latents = self.latents.clone()
 
                 for i, t in enumerate(timesteps):
-                    if self.prompts_dirty.is_set():
+                    if self.prompts_dirty.is_set() and self.restart_on_change.get():
                         break
+                    elif self.prompts_dirty.is_set():
+                        self.prepare_prompt_embeds()
+                        prompt_embeds = self.prompt_embeds
+                        self.prompts_dirty.clear()
 
                     print(i)
                     latent_model_input = torch.cat([latents] * 2) if do_classifier_free_guidance else self.latents
@@ -149,6 +148,7 @@ class StableDiffusion:
                     self.progress.set((i+1) / len(timesteps))
                 else:
                     self.update_image(latents)
+                    self.prompts_dirty.clear()
 
                 print("waiting")
                 self.prompts_dirty.wait()

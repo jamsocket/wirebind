@@ -25,7 +25,7 @@ class StableDiffusion:
     prompt_embeds: torch.Tensor
     num_timesteps: int = 10
     current_timestep: int = 0
-
+    prompt_template = Atom("a vibrant hdr color close-up of {}")
 
     def __init__(self):
         self.pipe = StableDiffusionPipeline.from_pretrained(MODEL_ID, torch_dtype=torch.float16)
@@ -37,6 +37,7 @@ class StableDiffusion:
         self.prepare_latents()
 
         self.prompts.add_listener(Sender(lambda _: self.prompts_dirty.set()))
+        self.prompt_template.add_listener(Sender(lambda _: self.prompts_dirty.set()))
 
         self.thread = Thread(target=self.run_diffusion)
         self.thread.start()
@@ -57,9 +58,11 @@ class StableDiffusion:
 
 
     def prepare_prompt_embeds(self):
+        template = self.prompt_template.get()
         embedded_prompts = [
-            (p["weight"], self.pipe._encode_prompt(p["prompt"], self.pipe._execution_device, 1, True))
+            (p["weight"], self.pipe._encode_prompt(template.format(p["prompt"]), self.pipe._execution_device, 1, True))
             for p in self.prompts.get()
+            if p["prompt"] != "" and p["weight"] != 0
         ]
 
         desired_norm = sum(p.norm() * w for (w, p) in embedded_prompts) / sum(w for (w, _) in embedded_prompts)
@@ -123,11 +126,12 @@ class StableDiffusion:
 
                     latents = self.pipe.scheduler.step(noise_pred, t, latents, **extra_step_kwargs, return_dict=False)[0]
 
-                    if i % 2 == 0:
-                        self.update_image(latents)
+                    if (i >= 5) and (i % 5 == 0):
+                        pass
+                        #self.update_image(latents)
                     self.progress.set(i / (len(timesteps) - 1))
-
-                self.update_image(latents)
+                else:
+                    self.update_image(latents)
 
                 print("waiting")
                 self.prompts_dirty.wait()
@@ -144,6 +148,7 @@ def root(message: any):
         "prompts": STABLE_DIFFUSION.prompts,
         "result": STABLE_DIFFUSION.result,
         "progress": STABLE_DIFFUSION.progress,
+        "prompt_template": STABLE_DIFFUSION.prompt_template,
         "shuffle_latents": Sender(STABLE_DIFFUSION.prepare_latents),
     }
     

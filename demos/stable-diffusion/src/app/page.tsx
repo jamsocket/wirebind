@@ -59,6 +59,7 @@ function StableDiffusionUI() {
   const sdApp = useRemoteObject("stable-diffusion")
   const imageData = useRemoteValue(sdApp?.result)
   const [prompts, setPrompts] = useRemoteMutable(sdApp?.prompts)
+  const [promptTemplate, setPromptTemplate] = useRemoteMutable(sdApp?.prompt_template)
   const progress = useRemoteValue(sdApp?.progress)
 
   let url = null
@@ -82,7 +83,7 @@ function StableDiffusionUI() {
 
   return (
     <div className="flex flex-col space-y-3">
-      <Button onClick={() => sdApp?.shuffle_latents.send()} text="Shuffle latents" />
+      <Button onClick={() => sdApp?.shuffle_latents.send()} text="Randomize" />
 
       <div>
         <div style={{ width: `${progress * 100}%`, transition: "width 200ms, opacity 500ms", opacity: (progress === 1 ? 0 : 1) }} className="h-1 bg-indigo-600 rounded-full"></div>
@@ -91,6 +92,12 @@ function StableDiffusionUI() {
       <div className="w-[768px] h-[768px] bg-black">
         {url ? <img src={url} /> : null}
       </div>
+
+      <input
+        type="text"
+        value={promptTemplate}
+        onChange={(t) => setPromptTemplate(t.target.value)}
+        className="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
 
       {
         prompts?.map((p: WeightedPrompt, i: number) => <div key={i} className="flex flex-row space-x-3"><WeightedPromptEntry value={p} onChange={(v) => {
@@ -114,7 +121,7 @@ function StableDiffusionUI() {
         disabled={prompts === undefined}
         onClick={() => {
           const newPrompts = [...prompts]
-          newPrompts.push({ prompt: "", weight: 1.0 })
+          newPrompts.push({ prompt: "", weight: 0.5 })
           setPrompts(newPrompts)
         }} />
     </div>

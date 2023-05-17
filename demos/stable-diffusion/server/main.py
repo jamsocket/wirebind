@@ -19,11 +19,15 @@ class StableDiffusion:
     progress = Atom(0)
     prompts_dirty: Event
     result = Atom(None)
+    num_timesteps = Atom(10)
+    show_progress = Atom(False)
+    restart_on_change = Atom(True)
+
     thread: Optional[Thread] = None
     pipe: StableDiffusionPipeline
     latents: torch.Tensor
     prompt_embeds: torch.Tensor
-    num_timesteps: int = 10
+    
     current_timestep: int = 0
     prompt_template = Atom("a vibrant hdr color close-up of {}")
 
@@ -36,11 +40,19 @@ class StableDiffusion:
 
         self.prepare_latents()
 
-        self.prompts.add_listener(Sender(lambda _: self.prompts_dirty.set()))
-        self.prompt_template.add_listener(Sender(lambda _: self.prompts_dirty.set()))
+        sender = Sender(self.soft_restart)
+
+        self.prompts.add_listener(sender)
+        self.prompt_template.add_listener(sender)
+        self.num_timesteps.add_listener(Sender(lambda _: self.prompts_dirty.set()))
 
         self.thread = Thread(target=self.run_diffusion)
         self.thread.start()
+
+
+    def soft_restart(self, _):
+        if self.restart_on_change.get():
+            self.prompts_dirty.set()
 
 
     def prepare_latents(self, _=None):
@@ -101,7 +113,7 @@ class StableDiffusion:
                 self.prompts_dirty.clear()
                 self.prepare_prompt_embeds()
 
-                self.pipe.scheduler.set_timesteps(self.num_timesteps)
+                self.pipe.scheduler.set_timesteps(self.num_timesteps.get())
                 timesteps = self.pipe.scheduler.timesteps
                 prompt_embeds = self.prompt_embeds
 
@@ -132,10 +144,9 @@ class StableDiffusion:
 
                     latents = self.pipe.scheduler.step(noise_pred, t, latents, **extra_step_kwargs, return_dict=False)[0]
 
-                    if (i >= 5) and (i % 5 == 0):
-                        pass
-                        #self.update_image(latents)
-                    self.progress.set(i / (len(timesteps) - 1))
+                    if (i % 5 == 0) and self.show_progress.get():
+                        self.update_image(latents)
+                    self.progress.set((i+1) / len(timesteps))
                 else:
                     self.update_image(latents)
 
@@ -155,6 +166,9 @@ def root(message: any):
         "result": STABLE_DIFFUSION.result,
         "progress": STABLE_DIFFUSION.progress,
         "prompt_template": STABLE_DIFFUSION.prompt_template,
+        "num_timesteps": STABLE_DIFFUSION.num_timesteps,
+        "show_progress": STABLE_DIFFUSION.show_progress,
+        "restart_on_change": STABLE_DIFFUSION.restart_on_change,
         "shuffle_latents": Sender(STABLE_DIFFUSION.prepare_latents),
     }
     

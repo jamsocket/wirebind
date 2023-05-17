@@ -60,6 +60,9 @@ function StableDiffusionUI() {
   const imageData = useRemoteValue(sdApp?.result)
   const [prompts, setPrompts] = useRemoteMutable(sdApp?.prompts)
   const [promptTemplate, setPromptTemplate] = useRemoteMutable(sdApp?.prompt_template)
+  const [timesteps, setTimesteps] = useRemoteMutable(sdApp?.num_timesteps)
+  const [showProgress, setShowProgress] = useRemoteMutable(sdApp?.show_progress)
+  const [restartOnChange, setRestartOnChange] = useRemoteMutable(sdApp?.restart_on_change)
   const progress = useRemoteValue(sdApp?.progress)
 
   let url = null
@@ -85,6 +88,21 @@ function StableDiffusionUI() {
     <div className="flex flex-col space-y-3">
       <Button onClick={() => sdApp?.shuffle_latents.send()} text="Randomize" />
 
+      <div className="grid grid-cols-3">
+        <label>
+          Timesteps:&nbsp;
+          <input type="range" min={10} max={500} step={1} value={timesteps ?? 10} onChange={(t) => setTimesteps(Number(t.target.value))} />
+        </label>
+        <label>
+          <input type="checkbox" checked={showProgress ?? false} onChange={(t) => setShowProgress(t.target.checked)} />
+          &nbsp;Show progress render
+        </label>
+        <label>
+          <input type="checkbox" checked={restartOnChange ?? false} onChange={(t) => setRestartOnChange(t.target.checked)} />
+          &nbsp;Restart on changes
+        </label>
+      </div>
+
       <div>
         <div style={{ width: `${progress * 100}%`, transition: "width 200ms, opacity 500ms", opacity: (progress === 1 ? 0 : 1) }} className="h-1 bg-indigo-600 rounded-full"></div>
       </div>
@@ -95,7 +113,7 @@ function StableDiffusionUI() {
 
       <input
         type="text"
-        value={promptTemplate}
+        value={promptTemplate ?? ""}
         onChange={(t) => setPromptTemplate(t.target.value)}
         className="block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
 

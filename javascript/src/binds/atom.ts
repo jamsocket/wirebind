@@ -95,7 +95,7 @@ export class AtomReplica {
         if (this.updateLocalValueTimeout !== null) {
             clearTimeout(this.updateLocalValueTimeout)
         }
-        this.updateLocalValueTimeout = setTimeout(this.updateLocalValue, 2_000)
+        this.updateLocalValueTimeout = setTimeout(this.updateLocalValue, 5_000)
     }
 
     get = () => {

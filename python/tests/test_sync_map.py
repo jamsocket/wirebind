@@ -194,3 +194,23 @@ def test_nest_map():
     sm.apply(mut)
 
     assert sm["a"]["b"] == 1
+
+
+def test_modify_map():
+    q1 = WrappedQueue()
+    sm1 = SyncMap()
+    sm1.set_parent(q1.put)
+
+    sm1["a"] = SyncMap()
+    q1_mut = q1.get()
+    sm1.apply(q1_mut)
+
+    q2 = WrappedQueue()
+    sm2 = SyncMap()
+    sm2.apply(q1_mut)
+    sm2.set_parent(q2.put)
+
+    sm2["a"]["b"] = 1
+
+    sm1.apply(q2.get())
+    assert sm1["a"]["b"] == 1

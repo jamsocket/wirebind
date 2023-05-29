@@ -28,6 +28,7 @@ class SyncMap(Syncable):
         self._optimistic[key] = (id, (value,))
 
     def nest_emit(self, mutation, key):
+        print("nest_emit", mutation, key, self)
         if self.callback is not None:
             self.callback(
                 {ID: mutation[ID], MUTATION: {key: {"apply": mutation[MUTATION]}}}
@@ -72,13 +73,11 @@ class SyncMap(Syncable):
             elif KIND in v:
                 ob = globals()[v[KIND]](v[VALUE])
                 self._map[k] = ob
-                # ob.set_parent(lambda v: v.nest_emit(mutation, k))
+                ob.set_parent(lambda v, k=k: self.nest_emit(v, k))
             elif VALUE in v:
                 self._map[k] = v[VALUE]
             elif APPLY in v:
-                print("h1")
                 self._map[k].apply_mut(v[APPLY], id)
-                print("h2")
             else:
                 raise ValueError("Invalid mutation value: {}".format(v))
 

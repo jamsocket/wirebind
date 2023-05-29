@@ -1,10 +1,10 @@
-from . import random_mutation_id, ID, MUTATION
+from . import random_mutation_id, ID, MUTATION, Syncable
 
-class SyncValue:
+class SyncValue(Syncable):
     def __init__(self, value, callback):
-        self.callback = callback
-        self._value = value
+        super().__init__(callback)
 
+        self._value = value
         # Optional[(mutation_id, (value,))]
         self._optimistic = None
     

@@ -1,8 +1,8 @@
-from . import random_mutation_id, ID, MUTATION
+from . import random_mutation_id, ID, MUTATION, Syncable
 
-class SyncMap:
+class SyncMap(Syncable):
     def __init__(self, callback):
-        self.callback = callback
+        super().__init__(callback)
         self._map = {}
 
         # Map of key -> (mutation_id, (value,))

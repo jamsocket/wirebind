@@ -27,6 +27,9 @@ class Syncable(ABC):
     def optimistic_reset(self):
         pass
 
-    @abstractmethod
     def apply(self, mutation: any):
+        self.apply_mut(mutation[MUTATION], mutation[ID])
+
+    @abstractmethod
+    def apply_mut(self, mutation: any, id: int):
         pass

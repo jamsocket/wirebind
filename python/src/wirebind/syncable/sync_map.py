@@ -1,4 +1,4 @@
-from . import random_mutation_id, ID, MUTATION, Syncable
+from . import Syncable
 
 class SyncMap(Syncable):
     def __init__(self):
@@ -42,12 +42,12 @@ class SyncMap(Syncable):
     def optimistic_reset(self):
         self._optimistic = {}
 
-    def apply(self, mutation):
-        for key in mutation[MUTATION].keys():
+    def apply_mut(self, mutation, id):
+        for key in mutation.keys():
             if key in self._optimistic:
-                if self._optimistic[key][0] == mutation[ID]:
+                if self._optimistic[key][0] == id:
                     del self._optimistic[key]
-        for k, v in mutation[MUTATION].items():
+        for k, v in mutation.items():
             if v is None:
                 del self._map[k]
             else:

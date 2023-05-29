@@ -1,4 +1,4 @@
-from . import random_mutation_id, ID, MUTATION, Syncable
+from . import Syncable
 
 class SyncValue(Syncable):
     def __init__(self, value):
@@ -23,8 +23,8 @@ class SyncValue(Syncable):
     def optimistic_reset(self):
         self._optimistic = None
     
-    def apply(self, mutation):
+    def apply_mut(self, mutation, id):
         if self._optimistic is not None:
-            if self._optimistic[0] == mutation[ID]:
+            if self._optimistic[0] == id:
                 self._optimistic = None
-        self._value = mutation[MUTATION]
+        self._value = mutation

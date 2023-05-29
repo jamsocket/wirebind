@@ -1,5 +1,8 @@
-from wirebind.sync_value import SyncValue, ID, MUTATION
 from queue import Queue
+
+from wirebind.syncable import MUTATION
+from wirebind.syncable.sync_value import SyncValue
+
 
 def test_optimistic_apply():
     q = Queue()

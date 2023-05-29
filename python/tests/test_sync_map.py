@@ -1,6 +1,10 @@
-from wirebind.sync_map import SyncMap, ID, MUTATION
 from queue import Queue
+
+from wirebind.syncable import ID, MUTATION
+from wirebind.syncable.sync_map import SyncMap
+
 from .util import never_called
+
 
 def test_optimistic_apply():
     q = Queue()

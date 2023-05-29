@@ -1,4 +1,4 @@
-from .sync_map import random_mutation_id, MUTATION, ID
+from . import random_mutation_id, ID, MUTATION
 
 class SyncValue:
     def __init__(self, value, callback):

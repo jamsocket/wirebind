@@ -1,10 +1,4 @@
-import random
-
-ID = "i"
-MUTATION = "m"
-
-def random_mutation_id():
-    return random.randint(0, 2**64)
+from . import random_mutation_id, ID, MUTATION
 
 class SyncMap:
     def __init__(self, callback):
@@ -66,10 +60,10 @@ class SyncMap:
         for key in sorted(set(self._map.keys()) | set(self._optimistic.keys())):
             if key in self:
                 yield key
-    
+
     def __len__(self):
         return len(list(iter(self)))
-    
+
     def items(self):
         for key in self:
             yield key, self[key]

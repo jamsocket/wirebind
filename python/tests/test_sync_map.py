@@ -146,3 +146,5 @@ def test_store_none():
 
     sm.optimistic_reset()
     assert 'a' not in sm
+
+

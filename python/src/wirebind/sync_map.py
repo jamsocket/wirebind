@@ -4,7 +4,7 @@ ID = "i"
 MUTATION = "m"
 
 def random_mutation_id():
-    return random.randint(0, 2**32)
+    return random.randint(0, 2**64)
 
 class SyncMap:
     def __init__(self, callback):
@@ -51,7 +51,6 @@ class SyncMap:
         self._optimistic = {}
 
     def apply(self, mutation):
-        print("Applying", mutation)
         for key in mutation[MUTATION].keys():
             if key in self._optimistic:
                 if self._optimistic[key][0] == mutation[ID]:

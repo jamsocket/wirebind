@@ -1,5 +1,6 @@
 import abc
 
+
 class Packable(abc.ABC):
     @abc.abstractmethod
     def pack(self) -> dict:

@@ -15,7 +15,7 @@ class BroadcastList:
 
     def __iter__(self):
         return iter(self.map.values())
-    
+
     def send(self, message: Any):
         for item in self:
             item.send(message)

@@ -39,7 +39,7 @@ class RemoteSender(Sender):
 
     def on_destroy(self, callback: Callable[[], None]):
         self.destroy_callbacks.append(callback)
-    
+
     def destroy(self):
         for callback in self.destroy_callbacks:
             callback()

@@ -28,5 +28,3 @@ def test_optimistic_reset():
 
     sm.apply(q.get(False))
     assert sm.get() == 1
-
-

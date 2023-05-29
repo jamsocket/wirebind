@@ -4,14 +4,19 @@ import random
 ID = "i"
 MUTATION = "m"
 
+
 def random_mutation_id():
     return random.randint(0, 2**64)
 
 
 class Syncable(ABC):
     callback: any = None
-    
+
     def __init__(self):
+        pass
+
+    @abstractmethod
+    def repr_json(self):
         pass
 
     def emit(self, mutation):
@@ -19,7 +24,7 @@ class Syncable(ABC):
         if self.callback is not None:
             self.callback({ID: id, MUTATION: mutation})
         return id
-    
+
     def set_parent(self, parent):
         self.callback = parent
 

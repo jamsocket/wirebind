@@ -33,7 +33,7 @@ class Multiplexer:
         """Send a message to the remote root callback."""
         self.send(message, ROOT)
 
-    def send(self, message: Any, channel: int):        
+    def send(self, message: Any, channel: int):
         message = Message(message, channel)
         message_enc = self.encoder.encode(message)
         self.send_function(message_enc)

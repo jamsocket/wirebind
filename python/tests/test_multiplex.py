@@ -3,6 +3,7 @@ from wirebind.multiplex import Multiplexer
 from queue import Queue
 from .util import multiplexer_pair, never_called
 
+
 def test_multiplexer_local():
     q = Queue()
     sender = Sender(q.put)

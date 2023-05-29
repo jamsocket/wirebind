@@ -3,6 +3,7 @@ from ..broadcast import BroadcastList
 from ..sender import Sender, AbstractSender
 from . import Packable
 
+
 class Atom(Packable):
     value: Any
     listeners: BroadcastList

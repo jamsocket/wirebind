@@ -1,5 +1,5 @@
 from typing import Any
-        
+
 
 class Message:
     def __init__(self, message: Any, channel: int):
@@ -11,7 +11,7 @@ class Message:
             "message": self.message,
             "ch": self.channel,
         }
-    
+
     @staticmethod
     def from_dict(data):
         return Message(

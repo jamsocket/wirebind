@@ -2,6 +2,7 @@ from queue import Queue
 from .util import multiplexer_pair
 from wirebind.binds.atom import Atom, AtomReplica
 
+
 def test_atom_becomes_replica():
     atom = Atom(4)
     server, client = multiplexer_pair()
@@ -14,6 +15,7 @@ def test_atom_becomes_replica():
     replica = q.get(False)
     assert isinstance(replica, AtomReplica)
     assert replica.value == 4
+
 
 def test_atom_replica_updates():
     atom = Atom(4)

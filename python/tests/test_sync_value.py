@@ -6,7 +6,8 @@ from wirebind.syncable.sync_value import SyncValue
 
 def test_optimistic_apply():
     q = Queue()
-    sm = SyncValue(7, q.put)
+    sm = SyncValue(7)
+    sm.set_parent(q.put)
     assert sm.get() == 7
 
     sm.set(1)
@@ -16,7 +17,8 @@ def test_optimistic_apply():
 
 def test_optimistic_reset():
     q = Queue()
-    sm = SyncValue(7, q.put)
+    sm = SyncValue(7)
+    sm.set_parent(q.put)
 
     sm.set(1)
     assert sm.get() == 1

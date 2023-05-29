@@ -8,7 +8,8 @@ from .util import never_called
 
 def test_optimistic_apply():
     q = Queue()
-    sm = SyncMap(q.put)
+    sm = SyncMap()
+    sm.set_parent(q.put)
 
     sm['a'] = 1
     assert sm['a'] == 1
@@ -20,7 +21,8 @@ def test_optimistic_apply():
 
 
 def test_server_mutation():
-    sm = SyncMap(never_called)
+    sm = SyncMap()
+    sm.set_parent(never_called)
 
     sm.apply({ID: "tmp", MUTATION: {'a': [1]}})
     assert sm['a'] == 1
@@ -29,7 +31,8 @@ def test_server_mutation():
 def test_optimistic_precedence():
     """Optimistic local changes should take precedence over server changes."""
     q = Queue()
-    sm = SyncMap(q.put)
+    sm = SyncMap()
+    sm.set_parent(q.put)
 
     sm['a'] = 1
     assert sm['a'] == 1
@@ -42,7 +45,8 @@ def test_optimistic_reset_once_acked():
     """Optimistic local changes should stop taking precedence once the server
     acknowledges them."""
     q = Queue()
-    sm = SyncMap(q.put)
+    sm = SyncMap()
+    sm.set_parent(q.put)
 
     sm['a'] = 1
     assert sm['a'] == 1
@@ -58,7 +62,7 @@ def test_optimistic_reset_once_acked():
 
 
 def test_explicit_optimistic_reset():
-    sm = SyncMap(lambda _: None)
+    sm = SyncMap()
 
     sm['a'] = 1
     assert sm['a'] == 1
@@ -72,7 +76,8 @@ def test_optimistic_reset_with_newer_change():
     """If the local data structure has had two changes to the same key, the server
     acknowledging one should not override the other."""
     q = Queue()
-    sm = SyncMap(q.put)
+    sm = SyncMap()
+    sm.set_parent(q.put)
 
     sm['a'] = 1
     assert sm['a'] == 1
@@ -91,7 +96,8 @@ def test_optimistic_round_trip():
     override the second mutation to value a.
     """
     q = Queue()
-    sm = SyncMap(q.put)
+    sm = SyncMap()
+    sm.set_parent(q.put)
 
     sm['a'] = 1
     assert sm['a'] == 1
@@ -111,7 +117,8 @@ def test_optimistic_round_trip():
 def test_del():
     """Deleting a key should remove it from the map."""
     q = Queue()
-    sm = SyncMap(q.put)
+    sm = SyncMap()
+    sm.set_parent(q.put)
 
     sm['a'] = 1
     assert sm['a'] == 1
@@ -124,7 +131,8 @@ def test_del():
 def test_store_none():
     """We can store a None value as distinct from being unset."""
     q = Queue()
-    sm = SyncMap(q.put)
+    sm = SyncMap()
+    sm.set_parent(q.put)
 
     assert 'a' not in sm
     sm['a'] = 1
@@ -154,7 +162,8 @@ def test_store_none():
 
 def test_iter_order():
     q = Queue()
-    sm = SyncMap(q.put)
+    sm = SyncMap()
+    sm.set_parent(q.put)
 
     sm['d'] = 4
     sm['b'] = 2
@@ -168,3 +177,16 @@ def test_iter_order():
         assert keys == ['a', 'b', 'c', 'd', 'e', 'f']
 
         sm.apply(q.get(False))
+
+
+def test_nest_map():
+    q = Queue()
+    sm = SyncMap()
+    sm.set_parent(q.put)
+
+    sm['a'] = SyncMap()
+    sm['a']['b'] = 1
+
+    assert sm['a']['b'] == 1
+    
+

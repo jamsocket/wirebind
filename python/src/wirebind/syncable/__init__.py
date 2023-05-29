@@ -9,10 +9,19 @@ def random_mutation_id():
 
 
 class Syncable(ABC):
-    callback: any
+    callback: any = None
     
-    def __init__(self, callback):
-        self.callback = callback
+    def __init__(self):
+        pass
+
+    def emit(self, mutation):
+        id = random_mutation_id()
+        if self.callback is not None:
+            self.callback({ID: id, MUTATION: mutation})
+        return id
+    
+    def set_parent(self, parent):
+        self.callback = parent
 
     @abstractmethod
     def optimistic_reset(self):

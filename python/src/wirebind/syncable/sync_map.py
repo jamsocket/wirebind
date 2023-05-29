@@ -1,8 +1,8 @@
 from . import random_mutation_id, ID, MUTATION, Syncable
 
 class SyncMap(Syncable):
-    def __init__(self, callback):
-        super().__init__(callback)
+    def __init__(self):
+        super().__init__()
         self._map = {}
 
         # Map of key -> (mutation_id, (value,))
@@ -12,9 +12,8 @@ class SyncMap(Syncable):
         return repr(self._map)
 
     def __setitem__(self, key, value):
-        id = random_mutation_id()
+        id = self.emit({key: [value]})
         self._optimistic[key] = (id, (value,))
-        self.callback({ID: id, MUTATION: {key: [value]}})
 
     def __contains__(self, key):
         try:
@@ -31,9 +30,8 @@ class SyncMap(Syncable):
         return self._map[key]
     
     def __delitem__(self, key):
-        id = random_mutation_id()
+        id = self.emit({key: None})
         self._optimistic[key] = (id, None)
-        self.callback({ID: id, MUTATION: {key: None}})
     
     def get(self, key, default=None):
         try:

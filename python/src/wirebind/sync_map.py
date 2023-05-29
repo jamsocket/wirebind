@@ -60,3 +60,16 @@ class SyncMap:
                 del self._map[k]
             else:
                 self._map[k] = v[0]
+
+    def __iter__(self):
+        # iterate over both optimistic and non-optimistic keys, in order.
+        for key in sorted(set(self._map.keys()) | set(self._optimistic.keys())):
+            if key in self:
+                yield key
+    
+    def __len__(self):
+        return len(list(iter(self)))
+    
+    def items(self):
+        for key in self:
+            yield key, self[key]

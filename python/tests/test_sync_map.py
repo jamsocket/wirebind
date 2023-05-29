@@ -148,3 +148,19 @@ def test_store_none():
     assert 'a' not in sm
 
 
+def test_iter_order():
+    q = Queue()
+    sm = SyncMap(q.put)
+
+    sm['d'] = 4
+    sm['b'] = 2
+    sm['e'] = 5
+    sm['a'] = 1
+    sm['c'] = 3
+    sm['f'] = 6
+
+    for _ in range(6):
+        keys = list(sm)
+        assert keys == ['a', 'b', 'c', 'd', 'e', 'f']
+
+        sm.apply(q.get(False))

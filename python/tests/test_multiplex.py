@@ -1,19 +1,7 @@
 from wirebind.sender import Sender
 from wirebind.multiplex import Multiplexer
 from queue import Queue
-
-
-def never_called(_):
-    assert False, "This function should never be called."
-
-
-def multiplexer_pair():
-    server = Multiplexer(never_called)
-    client = Multiplexer(server.receive)
-    server.send_function = client.receive
-
-    return server, client
-
+from .util import multiplexer_pair, never_called
 
 def test_multiplexer_local():
     q = Queue()
